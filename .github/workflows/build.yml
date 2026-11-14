@@ -1,0 +1,36 @@
+name: Build APK
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar (proyecto normal o TVMirror.zip)
+        run: |
+          if [ -f settings.gradle.kts ]; then
+            echo "DIR=." >> $GITHUB_ENV
+          else
+            unzip -q TVMirror.zip -d _src
+            echo "DIR=_src/TVMirror" >> $GITHUB_ENV
+          fi
+      - name: Descargar scrcpy-server oficial v3.1
+        run: |
+          mkdir -p "$DIR/app/src/main/assets"
+          curl -fL -o "$DIR/app/src/main/assets/scrcpy-server.jar" \
+            https://github.com/Genymobile/scrcpy/releases/download/v3.1/scrcpy-server-v3.1
+          ls -l "$DIR/app/src/main/assets/"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.7
+      - name: Compilar
+        run: gradle -p "$DIR" assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TVMirror-apk
+          path: ${{ env.DIR }}/app/build/outputs/apk/debug/app-debug.apk
