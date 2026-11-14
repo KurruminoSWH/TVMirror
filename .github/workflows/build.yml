@@ -15,11 +15,13 @@ jobs:
             unzip -q TVMirror.zip -d _src
             echo "DIR=_src/TVMirror" >> $GITHUB_ENV
           fi
-      - name: Descargar scrcpy-server oficial v3.1
+      - name: Descargar scrcpy-server oficial (version en SCRCPY_VERSION)
         run: |
+          V=$(cat "$DIR/SCRCPY_VERSION" | tr -d '[:space:]')
+          echo "scrcpy-server v$V"
           mkdir -p "$DIR/app/src/main/assets"
           curl -fL -o "$DIR/app/src/main/assets/scrcpy-server.jar" \
-            https://github.com/Genymobile/scrcpy/releases/download/v3.1/scrcpy-server-v3.1
+            "https://github.com/Genymobile/scrcpy/releases/download/v${V}/scrcpy-server-v${V}"
           ls -l "$DIR/app/src/main/assets/"
       - uses: actions/setup-java@v4
         with:
@@ -34,3 +36,4 @@ jobs:
         with:
           name: TVMirror-apk
           path: ${{ env.DIR }}/app/build/outputs/apk/debug/app-debug.apk
+          
